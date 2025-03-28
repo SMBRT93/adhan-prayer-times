@@ -29,6 +29,7 @@
             font-weight: bold;
         }
         .adhan { display: none; }
+        a { color: #f1c40f; font-size: 18px; text-decoration: none; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -43,43 +44,55 @@
         <p class="prayer">Isha : <span id="Isha">--:--</span></p>
     </div>
     
-    <audio id="adhan" class="adhan" src="https://www.islamcan.com/audio/adhan/azan1.mp3"></audio>
+    <audio id="adhan" class="adhan" src="http://islammedia.free.fr/audio/Adhan/Adhan_meshary_al_fasy.mp3"></audio>
+
+    <p>Pour plus d'informations, consultez les horaires de prière sur <a href="https://www.guidemusulman.com/horaires-prieres/mensuel/ville/36261/rosny-sous-bois-93110" target="_blank">Guide Musulman</a>.</p>
 
     <script>
+        // Afficher la date actuelle au format français
+        function formatDate(date) {
+            const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            const day = days[date.getDay()];
+            const dayOfMonth = date.getDate();
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+
+            return `${day} ${dayOfMonth} ${month} ${year}`;
+        }
+
+        document.getElementById("date").textContent = formatDate(new Date());
+
         async function getPrayerTimes() {
             const city = "Rosny-sous-Bois";  
             const country = "France";  
-            const method = 3;  // Méthode MWL = 12° (UOIF France)
+            const method = 3;  // MWL (Méthode 12° pour France)
 
-            const url = `http://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}`;
+            const url = `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}`;
             const response = await fetch(url);
             const data = await response.json();
-            const timings = data.data.timings;
-            const hijriDate = data.data.date.hijri;
-            const gregorianDate = data.data.date.gregorian;
 
-            document.getElementById("date").textContent = `${gregorianDate.weekday.en} ${gregorianDate.day} ${gregorianDate.month.en} ${gregorianDate.year} | ${hijriDate.day} ${hijriDate.month.en} ${hijriDate.year}H`;
+            // Affiche la réponse dans la console
+            console.log(data);
 
-            document.getElementById("Fajr").textContent = timings.Fajr;
-            document.getElementById("Dhuhr").textContent = timings.Dhuhr;
-            document.getElementById("Asr").textContent = timings.Asr;
-            document.getElementById("Maghrib").textContent = timings.Maghrib;
-            document.getElementById("Isha").textContent = timings.Isha;
+            if (data.code === 200) {
+                const timings = data.data.timings;
+                const hijriDate = data.data.date.hijri;
+                const gregorianDate = data.data.date.gregorian;
 
-            checkAdhanTimes(timings);
-        }
+                document.getElementById("date").textContent = `${gregorianDate.weekday.en} ${gregorianDate.day} ${gregorianDate.month.en} ${gregorianDate.year} | ${hijriDate.day} ${hijriDate.month.en} ${hijriDate.year}H`;
 
-        function checkAdhanTimes(timings) {
-            setInterval(() => {
-                const now = new Date();
-                const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-
-                Object.keys(timings).forEach(prayer => {
-                    if (timings[prayer] === currentTime) {
-                        document.getElementById("adhan").play();
-                    }
-                });
-            }, 60000); // Vérifie chaque minute
+                document.getElementById("Fajr").textContent = timings.Fajr;
+                document.getElementById("Dhuhr").textContent = timings.Dhuhr;
+                document.getElementById("Asr").textContent = timings.Asr;
+                document.getElementById("Maghrib").textContent = timings.Maghrib;
+                document.getElementById("Isha").textContent = timings.Isha;
+                
+                // Lancer l'adhan
+                document.getElementById("adhan").play();
+            } else {
+                console.error("Erreur dans la récupération des horaires");
+            }
         }
 
         getPrayerTimes();
