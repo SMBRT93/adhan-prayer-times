@@ -44,6 +44,7 @@
         <p class="prayer">Isha : <span id="Isha">--:--</span></p>
     </div>
     
+    <!-- L'URL de l'adhan -->
     <audio id="adhan" class="adhan" src="http://islammedia.free.fr/audio/Adhan/Adhan_meshary_al_fasy.mp3"></audio>
 
     <p>Pour plus d'informations, consultez les horaires de prière sur <a href="https://www.guidemusulman.com/horaires-prieres/mensuel/ville/36261/rosny-sous-bois-93110" target="_blank">Guide Musulman</a>.</p>
@@ -80,16 +81,33 @@
                 const hijriDate = data.data.date.hijri;
                 const gregorianDate = data.data.date.gregorian;
 
-                document.getElementById("date").textContent = `${gregorianDate.weekday.en} ${gregorianDate.day} ${gregorianDate.month.en} ${gregorianDate.year} | ${hijriDate.day} ${hijriDate.month.en} ${hijriDate.year}H`;
+                document.getElementById("date").textContent = `${gregorianDate.weekday.fr} ${gregorianDate.day} ${gregorianDate.month.fr} ${gregorianDate.year} | ${hijriDate.day} ${hijriDate.month.fr} ${hijriDate.year}H`;
 
                 document.getElementById("Fajr").textContent = timings.Fajr;
                 document.getElementById("Dhuhr").textContent = timings.Dhuhr;
                 document.getElementById("Asr").textContent = timings.Asr;
                 document.getElementById("Maghrib").textContent = timings.Maghrib;
                 document.getElementById("Isha").textContent = timings.Isha;
-                
-                // Lancer l'adhan
-                document.getElementById("adhan").play();
+
+                // Vérifier l'heure actuelle et comparer avec les horaires de prière
+                const currentTime = new Date();
+                const currentHour = currentTime.getHours();
+                const currentMinute = currentTime.getMinutes();
+                const currentTimeString = `${currentHour}:${currentMinute < 10 ? '0' : ''}${currentMinute}`;
+
+                const prayerTimes = [
+                    { time: timings.Fajr, name: "Fajr" },
+                    { time: timings.Dhuhr, name: "Dhuhr" },
+                    { time: timings.Asr, name: "Asr" },
+                    { time: timings.Maghrib, name: "Maghrib" },
+                    { time: timings.Isha, name: "Isha" }
+                ];
+
+                prayerTimes.forEach(prayer => {
+                    if (prayer.time === currentTimeString) {
+                        document.getElementById("adhan").play(); // Jouer l'adhan
+                    }
+                });
             } else {
                 console.error("Erreur dans la récupération des horaires");
             }
